@@ -46,7 +46,7 @@ export class DevPilotDB extends Dexie {
     this.version(7).stores({
       tasks: 'id, category, status, createdAt',
       agentMessages: 'id, taskId, timestamp',
-      taskArtifacts: 'id, taskId, type',
+      taskArtifacts: 'id, [taskId+type]',
       memories: 'id, scope, createdAt',
       agentRuns: 'id, taskId, status',
       agentEvents: 'id, taskId, timestamp',
