@@ -1,5 +1,5 @@
 import Dexie, { Table } from 'dexie';
-import { Task, AgentMessage, TaskArtifact, Memory, AgentRun, AgentEvent, RunStep, TaskMemoryHit, PatchProposal, PatchFile, VerificationPlan, VerificationResult, VerificationEvidence, DuoFlowRun, DuoAgentInvocation } from '../../types';
+import { Task, AgentMessage, TaskArtifact, Memory, AgentRun, AgentEvent, RunStep, TaskMemoryHit, PatchProposal, PatchFile, VerificationPlan, VerificationResult, VerificationEvidence, DuoFlowRun, DuoAgentInvocation, GitLabRepositoryAction, GitLabMergeRequestRecord, GitLabPipelineRecord } from '../../types';
 
 export class DevPilotDB extends Dexie {
   tasks!: Table<Task>;
@@ -17,6 +17,9 @@ export class DevPilotDB extends Dexie {
   verificationEvidences!: Table<VerificationEvidence>;
   duoFlowRuns!: Table<DuoFlowRun>;
   duoAgentInvocations!: Table<DuoAgentInvocation>;
+  gitlabRepositoryActions!: Table<GitLabRepositoryAction>;
+  gitlabMergeRequestRecords!: Table<GitLabMergeRequestRecord>;
+  gitlabPipelineRecords!: Table<GitLabPipelineRecord>;
 
   constructor() {
     super('DevPilotDB');
@@ -66,6 +69,27 @@ export class DevPilotDB extends Dexie {
         run.completedSteps = run.completedSteps ?? 0;
         run.mode = run.mode ?? 'mock';
       });
+    });
+
+    this.version(8).stores({
+      tasks: 'id, category, status, createdAt',
+      agentMessages: 'id, taskId, timestamp',
+      taskArtifacts: 'id, [taskId+type]',
+      memories: 'id, scope, createdAt',
+      agentRuns: 'id, taskId, status',
+      agentEvents: 'id, taskId, timestamp',
+      runSteps: 'id, runId, taskId, order',
+      taskMemoryHits: 'id, taskId, memoryId',
+      patchProposals: 'id, taskId, status',
+      patchFiles: 'id, proposalId, taskId',
+      verificationPlans: 'id, taskId, proposalId',
+      verificationResults: 'id, taskId, proposalId, status',
+      verificationEvidences: 'id, verificationResultId, taskId, type',
+      duoFlowRuns: 'id, taskId, flowRunId, flowDefinitionId, status, createdAt',
+      duoAgentInvocations: 'id, flowRunId, taskId, agentRole, stepKey, invocationStatus',
+      gitlabRepositoryActions: 'id, taskId, proposalId, actionType, status',
+      gitlabMergeRequestRecords: 'id, taskId, proposalId, mergeRequestIid',
+      gitlabPipelineRecords: 'id, taskId, proposalId, pipelineId, status'
     });
 
     this.version(3).stores({

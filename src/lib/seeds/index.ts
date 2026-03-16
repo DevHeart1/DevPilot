@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { Task, AgentMessage, TaskArtifact, Memory, AgentRun, AgentEvent, RunStep, TaskMemoryHit } from '../../types';
+import { Task, AgentMessage, TaskArtifact, Memory, AgentRun, AgentEvent, RunStep, TaskMemoryHit, GitLabRepositoryAction, GitLabMergeRequestRecord, GitLabPipelineRecord } from '../../types';
 
 export const TASK_ID_ACTIVE = crypto.randomUUID();
 
@@ -230,6 +230,75 @@ export async function initializeDb() {
     await db.agentEvents.bulkAdd(seedAgentEvents);
     await db.runSteps.bulkAdd(seedRunSteps);
     await db.taskMemoryHits.bulkAdd(seedTaskMemoryHits);
+
+    // Implementation 8: Repository Mutation Seeds
+    const demoProposalId = crypto.randomUUID();
+    await db.gitlabRepositoryActions.bulkAdd([
+      {
+        id: crypto.randomUUID(),
+        taskId: TASK_ID_ACTIVE,
+        proposalId: demoProposalId,
+        actionType: 'create_branch',
+        status: 'completed',
+        mode: 'fallback',
+        gitlabRef: 'fix/auth-refactor-demo',
+        summary: '[FALLBACK] Simulated branch creation: fix/auth-refactor-demo',
+        metadata: '{}',
+        startedAt: Date.now() - 1000 * 60 * 10,
+        updatedAt: Date.now() - 1000 * 60 * 10,
+        completedAt: Date.now() - 1000 * 60 * 10
+      },
+      {
+        id: crypto.randomUUID(),
+        taskId: TASK_ID_ACTIVE,
+        proposalId: demoProposalId,
+        actionType: 'apply_patch',
+        status: 'completed',
+        mode: 'fallback',
+        gitlabRef: 'sha-fallback-12345',
+        summary: '[FALLBACK] Simulated commit of 1 file(s).',
+        metadata: '{}',
+        startedAt: Date.now() - 1000 * 60 * 9,
+        updatedAt: Date.now() - 1000 * 60 * 9,
+        completedAt: Date.now() - 1000 * 60 * 9
+      }
+    ]);
+
+    await db.gitlabMergeRequestRecords.add({
+      id: crypto.randomUUID(),
+      taskId: TASK_ID_ACTIVE,
+      proposalId: demoProposalId,
+      mergeRequestIid: 42,
+      title: '[DevPilot] Refactor auth middleware',
+      status: 'opened',
+      webUrl: 'https://gitlab.com/demo/project/-/merge_requests/42',
+      sourceBranch: 'fix/auth-refactor-demo',
+      targetBranch: 'main',
+      createdAt: Date.now() - 1000 * 60 * 8,
+      updatedAt: Date.now() - 1000 * 60 * 8
+    });
+
+    await db.gitlabPipelineRecords.add({
+      id: crypto.randomUUID(),
+      taskId: TASK_ID_ACTIVE,
+      proposalId: demoProposalId,
+      pipelineId: 1001,
+      status: 'running',
+      webUrl: 'https://gitlab.com/demo/project/-/pipelines/1001',
+      ref: 'fix/auth-refactor-demo',
+      createdAt: Date.now() - 1000 * 60 * 7,
+      updatedAt: Date.now() - 1000 * 60 * 7
+    });
+
+    await db.agentMessages.add({
+      id: crypto.randomUUID(),
+      taskId: TASK_ID_ACTIVE,
+      sender: 'system',
+      content: 'GitLab Pipeline #1001 status changed to: **running**. ↻',
+      kind: 'info',
+      timestamp: Date.now() - 1000 * 60 * 6
+    });
+
     console.log("Database seeded successfully.");
   }
 }

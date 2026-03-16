@@ -47,9 +47,9 @@ export const taskService = {
   updateTaskArtifact: async (taskId: string, type: TaskArtifact['type'], content: string): Promise<string | number> => {
     const existing = await db.taskArtifacts.where('[taskId+type]').equals([taskId, type]).first();
     if (existing) {
-        return await db.taskArtifacts.update(existing.id, { content, timestamp: Date.now() });
+      return await db.taskArtifacts.update(existing.id, { content, timestamp: Date.now() });
     } else {
-        return await db.taskArtifacts.add({ id: crypto.randomUUID(), taskId, type, content, timestamp: Date.now() }) as string;
+      return await db.taskArtifacts.add({ id: crypto.randomUUID(), taskId, type, content, timestamp: Date.now() }) as string;
     }
   },
 
@@ -65,3 +65,6 @@ export * from './patchProposal.service';
 export * from './verificationComparison.service';
 
 export * from './gitlabDuo.service';
+export * from './gitlabRepository.service';
+export * from './gitlabEventRouter.service';
+export * from './gitlabWebhook.service';

@@ -42,6 +42,16 @@ export const devpilotFlow: DuoFlowDefinition = {
       description: "Create branch and Merge Request in GitLab based on approved patch."
     },
     {
+      key: "apply_repository_mutation",
+      agentRole: "system",
+      description: "Apply real repository mutations including commits and branch creation."
+    },
+    {
+      key: "monitor_pipeline",
+      agentRole: "system",
+      description: "Monitor the CI/CD pipeline for the newly created Merge Request."
+    },
+    {
       key: "verify_fix",
       agentRole: "verifier",
       description: "Compare sandbox pre-patch and post-patch UI states for regressions."

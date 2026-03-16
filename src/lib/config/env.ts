@@ -29,4 +29,10 @@ export const config = {
   gitlabUrl: getEnvVar('VITE_GITLAB_URL', 'https://gitlab.com'),
   gitlabToken: getEnvVar('VITE_GITLAB_TOKEN'),
   gitlabProjectId: getEnvVar('VITE_GITLAB_PROJECT_ID'),
+  gitlabDefaultBranch: getEnvVar('VITE_GITLAB_DEFAULT_BRANCH', 'main'),
+
+  // GitLab Repository Integration
+  liveRepositoryMode: getEnvVar('VITE_LIVE_REPOSITORY_MODE', 'false') === 'true',
+  liveEventMode: getEnvVar('VITE_LIVE_EVENT_MODE', 'false') === 'true',
+  webhookSecret: getEnvVar('VITE_GITLAB_WEBHOOK_SECRET'),
 };

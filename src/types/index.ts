@@ -70,17 +70,19 @@ export interface AgentRun {
 export interface AgentEvent {
   id: string;
   taskId: string;
-  source: "system" | "ui_agent" | "code_agent" | "memory_engine" | "orchestrator";
+  source: "system" | "ui_agent" | "code_agent" | "memory_engine" | "orchestrator" | "gitlab_event_router";
   type:
-    | "RUN_STARTED"
-    | "STEP_STARTED"
-    | "STEP_COMPLETED"
-    | "ARTIFACT_UPDATED"
-    | "MEMORY_RETRIEVED"
-    | "MEMORY_STORED"
-    | "STATUS_CHANGED"
-    | "RUN_COMPLETED"
-    | "RUN_FAILED";
+  | "RUN_STARTED"
+  | "STEP_STARTED"
+  | "STEP_COMPLETED"
+  | "ARTIFACT_UPDATED"
+  | "MEMORY_RETRIEVED"
+  | "MEMORY_STORED"
+  | "STATUS_CHANGED"
+  | "RUN_COMPLETED"
+  | "RUN_FAILED"
+  | "REPOSITORY_ACTION"
+  | "WEBHOOK_EVENT_RECEIVED";
   title: string;
   description: string;
   metadata: string;
@@ -186,3 +188,4 @@ export interface VerificationEvidence {
 
 
 export * from './gitlab-duo';
+export * from './gitlab-repository';

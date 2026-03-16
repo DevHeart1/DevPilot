@@ -8,6 +8,8 @@ export type DuoFlowStepKey =
   | "prepare_patch_proposal"
   | "wait_for_approval"
   | "handoff_to_gitlab"
+  | "apply_repository_mutation"
+  | "monitor_pipeline"
   | "verify_fix"
   | "finalize_task";
 
