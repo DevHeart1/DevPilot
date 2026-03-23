@@ -15,7 +15,7 @@ export const Support = ({ onBack }: { onBack: () => void }) => {
         <div className="animate-in fade-in slide-in-from-left-8 duration-700">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Get Support</h1>
           <p className="text-lg text-slate-400 mb-12 leading-relaxed">Need help with DevPilot? We're here for you. Fill out the form and our team will get back to you within 24 hours.</p>
-          
+
           <div className="space-y-8">
             <div className="flex items-start gap-5">
               <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 mt-1">
@@ -27,7 +27,7 @@ export const Support = ({ onBack }: { onBack: () => void }) => {
                 <a href="mailto:support@devpilot.ai" className="text-primary font-medium hover:underline">support@devpilot.ai</a>
               </div>
             </div>
-            
+
             <div className="flex items-start gap-5">
               <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0 mt-1">
                 <span className="material-symbols-outlined text-xl">forum</span>
@@ -51,7 +51,7 @@ export const Support = ({ onBack }: { onBack: () => void }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-surface/30 border border-border-subtle p-8 rounded-3xl shadow-2xl backdrop-blur-sm animate-in fade-in slide-in-from-right-8 duration-700">
           {isSubmitted ? (
             <div className="text-center py-16">
@@ -67,20 +67,20 @@ export const Support = ({ onBack }: { onBack: () => void }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">First Name</label>
-                  <input required type="text" className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="Jane" />
+                  <input id="first-name" name="firstName" required type="text" className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="Jane" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Last Name</label>
-                  <input required type="text" className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="Doe" />
+                  <input id="last-name" name="lastName" required type="text" className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="Doe" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
-                <input required type="email" className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="jane@example.com" />
+                <input id="email" name="email" required type="email" className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="jane@example.com" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">Subject</label>
-                <select className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all appearance-none">
+                <select id="subject" name="subject" className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all appearance-none">
                   <option>Technical Issue</option>
                   <option>Billing Question</option>
                   <option>Feature Request</option>
@@ -89,7 +89,7 @@ export const Support = ({ onBack }: { onBack: () => void }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">How can we help?</label>
-                <textarea required rows={5} className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all resize-none" placeholder="Please describe your issue in detail..."></textarea>
+                <textarea id="message" name="message" required rows={5} className="w-full bg-surface-dark border border-border-subtle rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all resize-none" placeholder="Please describe your issue in detail..."></textarea>
               </div>
               <button type="submit" className="w-full py-3.5 bg-primary text-background-dark font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 text-base">Send Message</button>
             </form>

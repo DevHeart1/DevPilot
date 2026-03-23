@@ -17,29 +17,34 @@ const allowedOrigins = [
   "http://localhost:3000",
 ];
 
+// Permissive but secure CORS configuration
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
+      // Always allow if no origin (e.g. curl)
       if (!origin) return callback(null, true);
 
-      const isAllowed = allowedOrigins.includes(origin) ||
-        origin.endsWith(".vercel.app") ||
-        process.env.NODE_ENV === "development";
+      const isVercel = origin.endsWith(".vercel.app");
+      const isLocal = origin.includes("localhost") || origin.includes("127.0.0.1");
+      const isAllowed = allowedOrigins.includes(origin);
 
-      if (isAllowed) {
+      if (isAllowed || isVercel || isLocal) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        // Log rejection for debugging but don't break the middleware chain with an error object
+        console.warn(`CORS rejected for origin: ${origin}`);
+        callback(null, false);
       }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204
+    maxAge: 86400, // 24 hours
   })
 );
+
+// Explicitly handle OPTIONS preflight for all routes
+app.options("*", cors() as any);
 
 // Configure http-proxy-middleware for noVNC and websockify
 // All traffic to /novnc and /websockify will be proxied to the local websockify port (6080)

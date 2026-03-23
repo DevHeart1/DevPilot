@@ -173,6 +173,8 @@ export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
                     Command Input
                   </div>
                   <input
+                    id="command-input"
+                    name="command"
                     type="text"
                     value={content}
                     onChange={(event) => setContent(event.target.value)}

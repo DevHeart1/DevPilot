@@ -78,18 +78,18 @@ export const Settings = ({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">First Name</label>
-                      <input required type="text" defaultValue="Alex" className="w-full bg-surface-dark border border-border-subtle rounded-lg py-2.5 px-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" />
+                      <label htmlFor="settings-first-name" className="block text-sm font-medium text-slate-300 mb-2">First Name</label>
+                      <input id="settings-first-name" name="firstName" required type="text" defaultValue="Alex" className="w-full bg-surface-dark border border-border-subtle rounded-lg py-2.5 px-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Last Name</label>
-                      <input required type="text" defaultValue="Developer" className="w-full bg-surface-dark border border-border-subtle rounded-lg py-2.5 px-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" />
+                      <label htmlFor="settings-last-name" className="block text-sm font-medium text-slate-300 mb-2">Last Name</label>
+                      <input id="settings-last-name" name="lastName" required type="text" defaultValue="Developer" className="w-full bg-surface-dark border border-border-subtle rounded-lg py-2.5 px-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Bio</label>
-                    <textarea rows={4} defaultValue="Building the future of automated development." className="w-full bg-surface-dark border border-border-subtle rounded-lg py-2.5 px-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"></textarea>
+                    <label htmlFor="settings-bio" className="block text-sm font-medium text-slate-300 mb-2">Bio</label>
+                    <textarea id="settings-bio" name="bio" rows={4} defaultValue="Building the future of automated development." className="w-full bg-surface-dark border border-border-subtle rounded-lg py-2.5 px-3 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"></textarea>
                     <p className="text-xs text-slate-500 mt-2">Brief description for your profile. URLs are hyperlinked.</p>
                   </div>
 
@@ -125,8 +125,8 @@ export const Settings = ({
                         <h4 className="text-sm font-semibold text-white">{item.title}</h4>
                         <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{item.desc}</p>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
-                        <input type="checkbox" className="sr-only peer" defaultChecked={item.defaultChecked} />
+                      <label htmlFor={`notif-${i}`} className="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                        <input id={`notif-${i}`} name={`notif-${i}`} type="checkbox" className="sr-only peer" defaultChecked={item.defaultChecked} />
                         <div className="w-11 h-6 bg-surface-dark peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border border-border-subtle peer-checked:border-primary"></div>
                       </label>
                     </div>
@@ -171,8 +171,10 @@ export const Settings = ({
                 <form onSubmit={handleSave} className="space-y-6">
                   <div className="p-6 rounded-2xl border border-border-subtle bg-surface/30 space-y-6">
                     <div>
-                      <label className="block text-sm font-semibold text-slate-300 mb-2">Target Application URL</label>
+                      <label htmlFor="settings-target-url" className="block text-sm font-semibold text-slate-300 mb-2">Target Application URL</label>
                       <input
+                        id="settings-target-url"
+                        name="targetAppBaseUrl"
                         type="url"
                         value={tempConfig.targetAppBaseUrl}
                         onChange={(e) => setTempConfig({ ...tempConfig, targetAppBaseUrl: e.target.value })}
@@ -183,8 +185,10 @@ export const Settings = ({
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-slate-300 mb-2">GitLab Default Branch</label>
+                      <label htmlFor="settings-gitlab-branch" className="block text-sm font-semibold text-slate-300 mb-2">GitLab Default Branch</label>
                       <input
+                        id="settings-gitlab-branch"
+                        name="gitlabDefaultBranch"
                         type="text"
                         value={tempConfig.gitlabDefaultBranch}
                         onChange={(e) => setTempConfig({ ...tempConfig, gitlabDefaultBranch: e.target.value })}
