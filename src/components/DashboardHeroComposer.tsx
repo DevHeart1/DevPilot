@@ -270,7 +270,7 @@ export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
                 <button
                   type="submit"
                   disabled={disabled || !isReady || isSubmitting || !content.trim()}
-                  className="group flex min-w-[132px] flex-1 items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/10 px-3.5 py-2.5 text-left transition-all duration-200 hover:border-primary/[0.35] hover:bg-primary/[0.14] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+                  className="group ml-0 flex min-w-[148px] flex-1 items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/10 px-4 py-2.5 transition-all duration-200 hover:border-primary/[0.35] hover:bg-primary/[0.14] disabled:cursor-not-allowed disabled:opacity-60 sm:ml-auto sm:flex-none"
                 >
                   <span className="flex min-w-0 items-center gap-2.5">
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/[0.14] text-primary">
@@ -285,7 +285,7 @@ export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
                       </span>
                     </span>
                   </span>
-                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-primary/90">
                     Go
                   </span>
                 </button>

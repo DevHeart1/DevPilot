@@ -78,6 +78,9 @@ export const taskService = {
 export * from './patchProposal.service';
 export * from './verificationComparison.service';
 export * from './verification.service';
+export * from './run.service';
+export * from './memory.service';
+export * from './timeline.service';
 
 export * from './gitlabDuo.service';
 export * from './gitlabRepository.service';
