@@ -152,7 +152,7 @@ export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
         </p>
 
         <div
-          className="hero-composer-shell mt-8 w-full max-w-4xl rounded-[30px] border border-white/[0.08] bg-surface-elevated/95 p-2 backdrop-blur-xl transition-all duration-300"
+          className="hero-composer-shell mt-8 w-full max-w-4xl rounded-[30px] border border-white/[0.08] bg-surface-elevated/95 p-3 backdrop-blur-xl transition-all duration-300"
           ref={containerRef}
         >
           <div className="relative rounded-[24px] border border-white/[0.06] bg-[linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015))]">
