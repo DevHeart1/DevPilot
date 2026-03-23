@@ -17,25 +17,21 @@ const allowedOrigins = [
   "http://localhost:3000",
 ];
 
-// Manual CORS middleware for maximum reliability
+// Ultra-aggressive CORS middleware for troubleshooting
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  // Dynamic validation for Vercel and Localhost
-  if (origin) {
-    const isVercel = origin.endsWith(".vercel.app");
-    const isLocal = origin.includes("localhost") || origin.includes("127.0.0.1");
-    const isAllowed = allowedOrigins.includes(origin);
+  // Log request for debugging
+  console.log(`${req.method} ${req.url} - Origin: ${origin || 'none'}`);
 
-    if (isAllowed || isVercel || isLocal) {
-      res.setHeader("Access-Control-Allow-Origin", origin);
-    }
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
   } else {
-    // Fallback for non-browser requests
     res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Credentials", "false");
   }
 
-  res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept");
   res.setHeader("Access-Control-Max-Age", "86400");
@@ -67,7 +63,13 @@ app.use(express.json());
 const apiRouter = express.Router();
 
 apiRouter.get("/health", (_req: Request, res: Response) => {
-  res.json({ status: "ok", time: new Date().toISOString() });
+  const version = "1.1.0-aggressive-cors";
+  res.setHeader("X-Sandbox-Version", version);
+  res.json({
+    status: "ok",
+    time: new Date().toISOString(),
+    version
+  });
 });
 
 apiRouter.post("/sessions", async (req: Request, res: Response) => {
