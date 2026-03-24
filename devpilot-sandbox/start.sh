@@ -1,5 +1,5 @@
 #!/bin/bash
-# Enable verbose tracing for Cloud Run logs
+# Enable verbose tracing
 set -x
 
 export PORT="${PORT:-8080}"
@@ -7,32 +7,12 @@ export DISPLAY="${DISPLAY:-:1}"
 export WS_PORT="${WS_PORT:-6080}"
 export HOME=/home/devpilot
 
-echo "--- DevPilot Sandbox Startup Diagnostics ---"
+echo "--- DevPilot Sandbox Startup (Consolidated KasmVNC) ---"
 echo "Current User: $(whoami)"
-echo "Environment: PORT=$PORT, DISPLAY=$DISPLAY, WS_PORT=$WS_PORT"
+echo "Environment: PORT=$PORT, DISPLAY=$DISPLAY"
 
-# 1. Setup KasmVNC auth database if it doesn't exist
+# 1. Setup VNC Config
 mkdir -p "$HOME/.vnc"
-
-# We check for both kasmvncuser and kasmvncadduser
-USER_CMD=""
-if command -v kasmvncadduser >/dev/null 2>&1; then
-    USER_CMD="kasmvncadduser"
-elif command -v kasmvncuser >/dev/null 2>&1; then
-    USER_CMD="kasmvncuser"
-elif [ -f "/usr/share/kasmvnc/bin/kasmvncadduser" ]; then
-    USER_CMD="/usr/share/kasmvnc/bin/kasmvncadduser"
-fi
-
-if [ -n "$USER_CMD" ]; then
-    echo "Creating KasmVNC user via $USER_CMD..."
-    $USER_CMD -u devpilot -p devpilot -w || echo "User might already exist"
-else
-    echo "WARNING: User management tool not found. KasmVNC might prompt for user creation."
-fi
-
-# 2. Generate kasmvnc.yaml
-# We ensure it hits the right port and stays functional
 cat << EOF > "$HOME/.vnc/kasmvnc.yaml"
 network:
   protocol: ipv4
@@ -44,28 +24,36 @@ network:
     require_ssl: false
 EOF
 
-# Setup xstartup
-cat << 'EOF' > "$HOME/.vnc/xstartup"
-#!/bin/sh
-fluxbox &
-EOF
-chmod +x "$HOME/.vnc/xstartup"
-
-# 3. Start KasmVNC
-echo "Starting KasmVNC..."
-# We use nohup and redirect logs to stdout/stderr
-# -disableHttpAuth allows the Express proxy to reach it without any prompt
+# 2. Start KasmVNC
+# KasmVNC (Xvnc) provides the X server for Playwright.
+# We bypass the wizard by having pre-configured /etc/kasmvnc/kasmvncauth.db in the image.
+echo "Starting KasmVNC on $DISPLAY..."
 nohup kasmvncserver $DISPLAY -depth 24 -geometry 1440x950 -disableHttpAuth > /tmp/kasmvnc.log 2>&1 &
 
-# 4. Wait for X server or logs
-sleep 5
-echo "--- KasmVNC Startup Logs ---"
-[ -f /tmp/kasmvnc.log ] && cat /tmp/kasmvnc.log
+# 3. Wait for X server to be ready
+echo "Waiting for X server..."
+MAX_RETRIES=20
+COUNT=0
+until xset -q -display $DISPLAY > /dev/null 2>&1 || [ $COUNT -eq $MAX_RETRIES ]; do
+    echo "Still waiting for X server ($COUNT/$MAX_RETRIES)..."
+    sleep 1
+    COUNT=$((COUNT + 1))
+done
+
+if [ $COUNT -eq $MAX_RETRIES ]; then
+    echo "ERROR: KasmVNC failed to provide X server on $DISPLAY!"
+    cat /tmp/kasmvnc.log
+    exit 1
+fi
+echo "X server is UP."
+
+# 4. Start Fluxbox (Window Manager)
+echo "Starting Fluxbox..."
+fluxbox -display $DISPLAY &
 
 # 5. Start Node.js API server
 echo "Starting Node.js server on port $PORT..."
-# Tailing KasmVNC log in background
 tail -f /tmp/kasmvnc.log &
 
-# Final process (Node.js) must be in foreground
+# Final process - Node will use DISPLAY=:1 for Playwright
 node dist/index.js

@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies for the GUI stack
 RUN apt-get update && apt-get install -y \
+    xvfb \
     fluxbox \
     wget \
     libxfont2 \
@@ -19,6 +20,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y ./kasmvncserver_focal_1.3.3_amd64.deb \
     && rm -f kasmvncserver_focal_1.3.3_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
+
+# Pre-configure KasmVNC system-wide to bypass prompts
+RUN mkdir -p /etc/kasmvnc && \
+    kasmvncadduser -u devpilot -p devpilot -w && \
+    mv /root/.vnc/kasmvncauth.db /etc/kasmvnc/kasmvncauth.db && \
+    chown -R root:root /etc/kasmvnc
 
 # Create a non-root user for KasmVNC
 RUN useradd -m -s /bin/bash devpilot && \
