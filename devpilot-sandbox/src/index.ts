@@ -53,7 +53,10 @@ const proxyOptions = {
 };
 
 // Proxy noVNC static assets
-app.use('/novnc', createProxyMiddleware(proxyOptions));
+app.use('/novnc', createProxyMiddleware({
+  ...proxyOptions,
+  pathRewrite: { '^/novnc': '' }
+}));
 app.use('/websockify', createProxyMiddleware(proxyOptions));
 
 // Root path for simple status check
