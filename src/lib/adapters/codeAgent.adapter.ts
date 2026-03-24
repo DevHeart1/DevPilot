@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import {
   GitLabRepositoryFile,
   NormalizedFixRecommendation,
@@ -83,8 +83,16 @@ Respond with valid JSON only:
 `.trim();
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-3.1-pro-preview",
       contents: [prompt],
+      config: {
+        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+        tools: [
+          { urlContext: {} },
+          { codeExecution: {} },
+          { googleSearch: {} },
+        ],
+      },
     });
 
     if (!response.text) {
@@ -128,10 +136,10 @@ ${input.recommendation.evidence.join("\n") || "None"}
 
 Repository Files:
 ${input.files
-  .map(
-    (file) => `FILE: ${file.filePath}\n${file.content}`,
-  )
-  .join("\n\n====\n\n")}
+        .map(
+          (file) => `FILE: ${file.filePath}\n${file.content}`,
+        )
+        .join("\n\n====\n\n")}
 
 Respond with JSON:
 {

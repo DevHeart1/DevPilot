@@ -1,14 +1,14 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { config } from "../config/env";
 
 export interface VisionAnalysisResult {
   summary: string;
   issueType:
-    | "layout_overflow"
-    | "visual_regression"
-    | "console_error"
-    | "network_error"
-    | "unknown";
+  | "layout_overflow"
+  | "visual_regression"
+  | "console_error"
+  | "network_error"
+  | "unknown";
   severity: "low" | "medium" | "high";
   suspectedComponent: string;
   explanation: string;
@@ -115,8 +115,16 @@ Respond with valid JSON only:
     }
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
+      model: "gemini-3.1-pro-preview",
       contents,
+      config: {
+        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
+        tools: [
+          { urlContext: {} },
+          { codeExecution: {} },
+          { googleSearch: {} },
+        ],
+      },
     });
 
     if (!response.text) {
