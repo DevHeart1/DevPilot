@@ -14,31 +14,33 @@ RUN apt-get update && apt-get install -y \
     libjpeg-turbo8 \
     x11-xserver-utils \
     libnss3-tools \
+    sudo \
     && wget https://github.com/kasmtech/KasmVNC/releases/download/v1.3.3/kasmvncserver_focal_1.3.3_amd64.deb \
     && apt-get install -y ./kasmvncserver_focal_1.3.3_amd64.deb \
     && rm -f kasmvncserver_focal_1.3.3_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
-# Pre-create KasmVNC directory
-RUN mkdir -p /root/.vnc
+# Create a non-root user for KasmVNC
+RUN useradd -m -s /bin/bash devpilot && \
+    echo "devpilot ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install project dependencies
-RUN npm install
-
-# Copy project source
+# Copy application files
 COPY . .
 
-# Build the TypeScript source
+# Install dependencies and build
+RUN npm install
 RUN npm run build
 
-# Ensure the start script is executable
-RUN chmod +x start.sh
+# Ensure correct permissions for the devpilot user
+RUN chown -R devpilot:devpilot /app && \
+    mkdir -p /home/devpilot/.vnc && \
+    chown -R devpilot:devpilot /home/devpilot
+
+# Switch to non-root user
+USER devpilot
 
 # Cloud Run expects the service to listen on $PORT
 # noVNC and websockify will use internal ports linked to this
