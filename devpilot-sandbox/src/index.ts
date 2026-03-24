@@ -11,22 +11,6 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const WS_PORT = process.env.WS_PORT || 6080;
 
-// Startup Diagnostics
-console.log("--- STARTUP DIAGNOSTICS ---");
-console.log(`Node Version: ${process.version}`);
-console.log(`CWD: ${process.cwd()}`);
-console.log(`Port: ${PORT}, WS_Port: ${WS_PORT}`);
-console.log(`Display: ${process.env.DISPLAY}`);
-console.log(`User: ${process.env.USER || 'unknown'} (UID: ${process.getuid?.()})`);
-
-import { execSync } from "child_process";
-try {
-  const chromiumPath = execSync("which google-chrome || which chromium-browser || which chromium", { encoding: 'utf8' }).trim();
-  console.log(`Chromium path: ${chromiumPath}`);
-} catch (e) {
-  console.log("Chromium binary not found in PATH via 'which'");
-}
-
 const allowedOrigins = [
   "https://dev-pilot-phi.vercel.app",
   "http://localhost:5173",
@@ -72,6 +56,15 @@ const proxyOptions = {
 app.use('/novnc', createProxyMiddleware(proxyOptions));
 app.use('/websockify', createProxyMiddleware(proxyOptions));
 
+// Root path for simple status check
+app.get("/", (_req: Request, res: Response) => {
+  res.json({
+    service: "DevPilot Sandbox",
+    status: "online",
+    time: new Date().toISOString()
+  });
+});
+
 // JSON parser for REST API routes only
 app.use(express.json());
 
@@ -98,17 +91,12 @@ apiRouter.post("/sessions", async (req: Request, res: Response) => {
   }
 
   try {
-    console.log(`Creating session: ID=${id}, URL=${targetUrl}`);
     const session = await sessionService.createSession(id, targetUrl, viewport);
-    console.log(`Session created successfully: ${session.id}`);
+    console.log(`Session active: ${session.id} -> ${targetUrl}`);
     res.json(sessionService.getSerializableSession(session.id));
   } catch (error: any) {
-    console.error("CRITICAL: Failed to create session");
-    console.error(error); // This will log the full stack trace in Cloud Run
-    res.status(500).json({
-      error: error.message || "Failed to create session",
-      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
-    });
+    console.error(`Failed to create session ${id}:`, error.message);
+    res.status(500).json({ error: error.message || "Failed to create session" });
   }
 });
 

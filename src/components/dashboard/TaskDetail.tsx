@@ -177,7 +177,10 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
             if (!config.isGitLabConfigured || cancelled) return;
 
             if (mrRecord?.mergeRequestIid && !terminalMrStates.has(mrRecord.status)) {
-                const mrStatus = await gitlabRepositoryAdapter.fetchMRStatus(mrRecord.mergeRequestIid);
+                const mrStatus = await gitlabRepositoryAdapter.fetchMRStatus(
+                    mrRecord.mergeRequestIid,
+                    task?.gitlabProjectId
+                );
                 if (!cancelled && mrStatus.success && mrStatus.data) {
                     await gitlabRepositoryService.updateMergeRequestRecord(mrRecord.id, {
                         status: mrStatus.data.status as typeof mrRecord.status,
@@ -191,7 +194,10 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
             }
 
             if (pipelineRecord?.pipelineId && !terminalPipelineStates.has(pipelineRecord.status)) {
-                const pipelineStatus = await gitlabRepositoryAdapter.fetchPipelineStatus(pipelineRecord.pipelineId);
+                const pipelineStatus = await gitlabRepositoryAdapter.fetchPipelineStatus(
+                    pipelineRecord.pipelineId,
+                    task?.gitlabProjectId
+                );
                 if (!cancelled && pipelineStatus.success && pipelineStatus.data) {
                     await gitlabRepositoryService.updatePipelineRecord(pipelineRecord.id, {
                         status: pipelineStatus.data.status as typeof pipelineRecord.status,

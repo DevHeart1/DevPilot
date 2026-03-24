@@ -114,6 +114,7 @@ export const runCodeFixWorkflow = async (taskId: string) => {
     const visionAnalysisResult = parseVisionArtifact(visionArtifact?.content);
 
     const treeResult = await gitlabRepositoryAdapter.listRepositoryTree(
+      task.gitlabProjectId,
       task.branch || task.defaultBranch,
     );
     if (!treeResult.success || !treeResult.data) {
@@ -204,7 +205,11 @@ export const runCodeFixWorkflow = async (taskId: string) => {
 
     const fileResults = await Promise.all(
       recommendation.suspectedFiles.map((filePath) =>
-        gitlabRepositoryAdapter.getFileContent(filePath, task.branch || task.defaultBranch),
+        gitlabRepositoryAdapter.getFileContent(
+          filePath,
+          task.gitlabProjectId,
+          task.branch || task.defaultBranch
+        ),
       ),
     );
     const files = fileResults

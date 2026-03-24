@@ -95,6 +95,7 @@ export async function runRepositoryMutationWorkflow(
   );
   const branchResult = await gitlabRepositoryAdapter.createBranch(
     branchName,
+    task.gitlabProjectId,
     task.branch || task.defaultBranch,
   );
   if (!branchResult.success || !branchResult.data) {
@@ -131,6 +132,7 @@ export async function runRepositoryMutationWorkflow(
     branchName,
     gitlabFiles,
     `Fix: ${proposal.title}\n\nAutomated by DevPilot.`,
+    task.gitlabProjectId,
   );
   if (!commitResult.success || !commitResult.data) {
     throw new Error(commitResult.error || "Failed to create the GitLab commit.");
@@ -162,6 +164,7 @@ export async function runRepositoryMutationWorkflow(
     `## AI Fix Proposal\n\n${proposal.summary}\n\nConfidence: ${Math.round(
       proposal.confidence * 100,
     )}%`,
+    task.gitlabProjectId,
     task.defaultBranch || task.branch,
   );
   if (!mrResult.success || !mrResult.data) {
@@ -207,7 +210,10 @@ export async function runRepositoryMutationWorkflow(
     "running",
     "Triggering pipeline...",
   );
-  const pipelineResult = await gitlabRepositoryAdapter.rerunPipeline(branchName);
+  const pipelineResult = await gitlabRepositoryAdapter.rerunPipeline(
+    branchName,
+    task.gitlabProjectId
+  );
   if (!pipelineResult.success || !pipelineResult.data) {
     throw new Error(pipelineResult.error || "Failed to trigger the pipeline.");
   }
