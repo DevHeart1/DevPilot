@@ -9,6 +9,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     fluxbox \
     wget \
+    libxfont2 \
+    libxkbfile1 \
     && wget https://github.com/kasmtech/KasmVNC/releases/download/v1.3.3/kasmvncserver_focal_1.3.3_amd64.deb \
     && apt-get install -y ./kasmvncserver_focal_1.3.3_amd64.deb \
     && rm -f kasmvncserver_focal_1.3.3_amd64.deb \
