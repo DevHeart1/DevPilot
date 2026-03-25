@@ -138,10 +138,15 @@ You are a senior TypeScript/React code generation agent.
 Update the provided repository files to address the issue.
 Return only valid JSON. Do not include markdown fences.
 
+IMPORTANT: You MUST generate fixes for ALL suspected files listed below.
+The plan identified ${input.recommendation.suspectedFiles.length} files to fix.
+Do NOT skip any of them. Every suspected file must appear in your "files" array output.
+
 Issue Type: ${input.recommendation.issueType}
 Suspected Component: ${input.recommendation.suspectedComponent}
 Explanation: ${input.recommendation.explanation}
 Recommended Fix: ${input.recommendation.recommendedFix}
+Suspected Files: ${input.recommendation.suspectedFiles.join(", ")}
 Evidence:
 ${input.recommendation.evidence.join("\n") || "None"}
 

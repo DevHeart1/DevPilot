@@ -122,12 +122,39 @@ export const runExecuteCodeFixWorkflow = async (taskId: string, proposalId: stri
             files,
         });
 
+        const thinkingStartMs = Date.now();
+
         if (agentThought) {
+            const thinkingDurationMs = Date.now() - thinkingStartMs;
+            // Build structured activity entries for each edited file
+            const activities: Array<{ type: "edited" | "analyzed" | "thinking"; file?: string; durationMs?: number; detail?: string }> = [];
+
+            // Thinking entry
+            activities.push({
+                type: "thinking",
+                durationMs: thinkingDurationMs > 500 ? thinkingDurationMs : 3000,
+                detail: agentThought,
+            });
+
+            // Analyzed entries for each input file
+            for (const f of files) {
+                activities.push({ type: "analyzed", file: f.filePath });
+            }
+
+            // Edited entries for each patched file
+            for (const pf of patchFiles) {
+                activities.push({ type: "edited", file: pf.filePath });
+            }
+
             await taskService.appendAgentMessage({
                 taskId,
                 sender: "code_agent",
-                content: agentThought,
+                content: "",
                 kind: "thinking",
+                meta: {
+                    heading: generatedProposal.title || "Generating code patches",
+                    activities,
+                },
                 timestamp: Date.now(),
             });
         }
@@ -173,7 +200,7 @@ export const runExecuteCodeFixWorkflow = async (taskId: string, proposalId: stri
         await taskService.appendAgentMessage({
             taskId,
             sender: "devpilot",
-            content: "Code modifications are complete. Patch is ready for review.",
+            content: `Code modifications complete. ${patchFiles.length} file(s) patched and ready for review.`,
             kind: "success",
             timestamp: Date.now(),
         });

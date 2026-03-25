@@ -558,23 +558,99 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
 
                                     return (
                                         <div key={message.id} className="space-y-1.5 opacity-95 hover:opacity-100 transition-opacity">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className={`flex size-5 items-center justify-center rounded border ${bgClass} ${colorClass}`}>
-                                                    <span className="material-symbols-outlined text-[13px]">{icon}</span>
+                                            {/* Section heading from meta */}
+                                            {message.meta?.heading && (
+                                                <p className="text-[13px] font-bold text-slate-200 leading-snug pt-1">
+                                                    {message.meta.heading}
+                                                </p>
+                                            )}
+
+                                            {/* Structured activity entries */}
+                                            {message.meta?.activities && message.meta.activities.length > 0 && (
+                                                <div className="space-y-1">
+                                                    {message.meta.activities.map((act, i) => {
+                                                        if (act.type === "edited" || act.type === "created") {
+                                                            return (
+                                                                <div key={i} className="flex items-center gap-2 py-1">
+                                                                    <span className="material-symbols-outlined text-[14px] text-slate-500">description</span>
+                                                                    <span className="text-[12px] text-slate-400">{act.type === "edited" ? "Edited" : "Created"}</span>
+                                                                    <span className="text-[12px] font-semibold text-blue-400">⚛ {act.file?.split("/").pop()}</span>
+                                                                    <span className="ml-auto material-symbols-outlined text-[13px] text-slate-600 cursor-pointer hover:text-slate-400">open_in_new</span>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        if (act.type === "analyzed") {
+                                                            return (
+                                                                <div key={i} className="flex items-center gap-2 py-1">
+                                                                    <span className="material-symbols-outlined text-[14px] text-slate-500">description</span>
+                                                                    <span className="text-[12px] text-slate-400">Analyzed</span>
+                                                                    <span className="text-[12px] font-semibold text-blue-400">⚛ {act.file?.split("/").pop()}{act.detail ? ` ${act.detail}` : ""}</span>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        if (act.type === "thinking") {
+                                                            const sec = act.durationMs ? Math.round(act.durationMs / 1000) : null;
+                                                            return (
+                                                                <details key={i} className="group">
+                                                                    <summary className="flex items-center gap-2 py-1 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
+                                                                        <span className="material-symbols-outlined text-[12px] text-slate-600 group-open:rotate-90 transition-transform">chevron_right</span>
+                                                                        <span className="text-[12px] text-slate-500">Thought for {sec ? `${sec}s` : "..."}</span>
+                                                                    </summary>
+                                                                    {act.detail && (
+                                                                        <div className="ml-5 mt-1 rounded border border-border-dark bg-black/40 p-2 text-[11px] text-slate-400 font-mono leading-relaxed max-h-40 overflow-y-auto custom-scrollbar whitespace-pre-wrap">
+                                                                            {act.detail}
+                                                                        </div>
+                                                                    )}
+                                                                </details>
+                                                            );
+                                                        }
+                                                        if (act.type === "searched") {
+                                                            return (
+                                                                <div key={i} className="flex items-center gap-2 py-1">
+                                                                    <span className="material-symbols-outlined text-[14px] text-slate-500">search</span>
+                                                                    <span className="text-[12px] text-slate-400">{act.detail || "Searched codebase"}</span>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })}
                                                 </div>
-                                                <span className={`text-[11px] font-bold tracking-wider uppercase ${colorClass}`}>{label}</span>
-                                                <span className="text-[10px] text-slate-600 ml-auto font-mono">
-                                                    {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
-                                            </div>
-                                            <div className={`rounded-lg border border-border-dark bg-[#151515] p-3 text-[13px] leading-relaxed break-words ${message.sender === "system" ? "text-slate-400 font-mono text-[11px]" : "text-slate-300"}`}>
-                                                {message.content}
-                                                {message.artifactIds && message.artifactIds.length > 0 && (
-                                                    <div className="mt-3 flex flex-wrap gap-2">
-                                                        {message.artifactIds.map(id => <MessageAttachment key={id} artifactId={id} />)}
+                                            )}
+
+                                            {/* Standard message bubble (only if content exists and no activities) */}
+                                            {message.content && (!message.meta?.activities || message.meta.activities.length === 0) && (
+                                                <>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <div className={`flex size-5 items-center justify-center rounded border ${bgClass} ${colorClass}`}>
+                                                            <span className="material-symbols-outlined text-[13px]">{icon}</span>
+                                                        </div>
+                                                        <span className={`text-[11px] font-bold tracking-wider uppercase ${colorClass}`}>{label}</span>
+                                                        <span className="text-[10px] text-slate-600 ml-auto font-mono">
+                                                            {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
                                                     </div>
-                                                )}
-                                            </div>
+                                                    <div className={`rounded-lg border border-border-dark bg-[#151515] p-3 text-[13px] leading-relaxed break-words ${message.sender === "system" ? "text-slate-400 font-mono text-[11px]" : "text-slate-300"}`}>
+                                                        {message.content}
+                                                        {message.artifactIds && message.artifactIds.length > 0 && (
+                                                            <div className="mt-3 flex flex-wrap gap-2">
+                                                                {message.artifactIds.map(id => <MessageAttachment key={id} artifactId={id} />)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {/* Activities with content — show content as a bubble below */}
+                                            {message.content && message.meta?.activities && message.meta.activities.length > 0 && (
+                                                <div className={`rounded-lg border border-border-dark bg-[#151515] p-3 text-[13px] leading-relaxed break-words ${message.sender === "system" ? "text-slate-400 font-mono text-[11px]" : "text-slate-300"}`}>
+                                                    {message.content}
+                                                    {message.artifactIds && message.artifactIds.length > 0 && (
+                                                        <div className="mt-3 flex flex-wrap gap-2">
+                                                            {message.artifactIds.map(id => <MessageAttachment key={id} artifactId={id} />)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}

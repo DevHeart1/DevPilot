@@ -29,6 +29,18 @@ export interface Task {
   targetBranch?: string;
 }
 
+export interface AgentMessageMeta {
+  /** Structured activity entries shown as timeline items */
+  activities?: Array<{
+    type: "edited" | "analyzed" | "thinking" | "created" | "searched";
+    file?: string;
+    durationMs?: number;
+    detail?: string;
+  }>;
+  /** Section heading shown above the activity group */
+  heading?: string;
+}
+
 export interface AgentMessage {
   id: string;
   taskId: string;
@@ -36,6 +48,7 @@ export interface AgentMessage {
   content: string;
   kind: "info" | "warning" | "success" | "thinking";
   artifactIds?: string[];
+  meta?: AgentMessageMeta;
   timestamp: number;
 }
 
