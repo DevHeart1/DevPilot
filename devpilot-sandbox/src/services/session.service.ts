@@ -54,9 +54,12 @@ export class SessionService {
     viewport: SandboxViewport = DEFAULT_VIEWPORT,
   ): Promise<SandboxSession> {
     if (this.activeSession && this.activeSession.status !== "closed") {
-      throw new Error(
-        "A session is already active in this container. Cloud Run concurrency should manage multiple containers.",
-      );
+      console.warn(`Forcefully closing existing session ${this.activeSession.id} to start a new one.`);
+      try {
+        await this.closeSession(this.activeSession.id);
+      } catch (e) {
+        console.error("Error closing previous session:", e);
+      }
     }
 
     this.activeSession = {

@@ -13,6 +13,7 @@ import {
     runService,
 } from "../../lib/services";
 import { PatchDiff } from "./PatchDiff";
+import { RunStepsProgress } from "./RunStepsProgress";
 import { runUiInspectionWorkflow } from "../../lib/workflows/uiInspection.workflow";
 import { runVerificationPreparationWorkflow } from "../../lib/workflows/verificationPreparation.workflow";
 import { runFollowUpWorkflow, runExecuteCodeFixWorkflow } from "../../lib/workflows";
@@ -445,6 +446,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
                         </div>
                         {isAgentOpen && (
                             <div className="flex-1 space-y-5 overflow-y-auto p-4 custom-scrollbar">
+                                {runSteps && runSteps.length > 0 && <RunStepsProgress steps={runSteps} />}
                                 {(messages || []).map((message) => {
                                     // Determine styling based on sender role
                                     let icon = "smart_toy";

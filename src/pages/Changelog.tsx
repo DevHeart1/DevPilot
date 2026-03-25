@@ -14,9 +14,34 @@ interface ReleaseEntry {
 
 const releases: ReleaseEntry[] = [
   {
+    version: "v2.6.0",
+    date: "March 25, 2026",
+    isLatest: true,
+    icon: "published_with_changes",
+    sections: [
+      {
+        title: "Agentic Workflows",
+        color: "bg-emerald-500",
+        items: [
+          "Introduced Pre-Computation Planning & Security Audit approval gate",
+          "Added proactive Agentic Security Audits and Compliance Checks prior to generative code modifications",
+          "Implemented Conversational Follow-up workflows to contextually refine AI execution plans",
+          "Migrated DevPilot Sandbox to a stable Node.js headless Playwright architecture"
+        ]
+      },
+      {
+        title: "Dashboard UI",
+        color: "bg-rose-500",
+        items: [
+          "Built a beautifully styled interactive modal to review implementation plans and security findings",
+          "Added the RunStepsProgress component to visually track and animate the active lifecycle of AI operations"
+        ]
+      }
+    ]
+  },
+  {
     version: "v2.5.5",
     date: "March 23, 2026",
-    isLatest: true,
     icon: "shield",
     sections: [
       {
