@@ -68,11 +68,18 @@ export class WorkspaceService {
         return fs.existsSync(pkgPath);
     }
 
+    getPackageManager(dir: string): "npm" | "yarn" | "pnpm" {
+        if (fs.existsSync(path.join(dir, "pnpm-lock.yaml"))) return "pnpm";
+        if (fs.existsSync(path.join(dir, "yarn.lock"))) return "yarn";
+        return "npm";
+    }
+
     getWorkspaceInfo() {
         return {
             repoPath: this.currentRepoPath,
             appPath: this.currentAppPath,
             packageJsonExists: this.currentAppPath ? this.hasPackageJson(this.currentAppPath) : false,
+            packageManager: this.currentAppPath ? this.getPackageManager(this.currentAppPath) : "npm",
         };
     }
 }

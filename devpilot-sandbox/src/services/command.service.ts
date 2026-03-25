@@ -39,6 +39,13 @@ export class CommandService {
         console.log(`Package.json found: ${info.packageJsonExists}`);
         console.log(`Command:           "${command}"`);
         console.log(`Exact CWD used:     ${finalCwd}`);
+        // Intelligence for package manager
+        const { packageManager } = workspaceService.getWorkspaceInfo();
+        let finalCommand = command;
+        if (command.startsWith("npm") && packageManager !== "npm") {
+            finalCommand = command.replace("npm", packageManager);
+            console.log(`[INTELLIGENCE] Swapping 'npm' for '${packageManager}' lockfile found.`);
+        }
         console.log(`---------------------------\n`);
 
         try {
@@ -46,12 +53,14 @@ export class CommandService {
                 throw new Error(`Directory does not exist: ${finalCwd}`);
             }
 
-            // Pre-check for npm commands
-            if (command.startsWith("npm") && !fs.existsSync(path.join(finalCwd, "package.json"))) {
-                console.warn(`[WARNING] No package.json found in ${finalCwd}. Command might fail.`);
+            // Pre-check for manifest
+            if (!fs.existsSync(path.join(finalCwd, "package.json"))) {
+                console.warn(`[WARNING] No package.json found in ${finalCwd}. Manifest list follows:`);
+                const files = fs.readdirSync(finalCwd).join(", ");
+                throw new Error(`Execution aborted: package.json missing in CWD. Files present: ${files}`);
             }
 
-            const { stdout, stderr } = await execAsync(command, {
+            const { stdout, stderr } = await execAsync(finalCommand, {
                 cwd: finalCwd,
                 env: { ...process.env, CI: "true" },
             });
@@ -64,12 +73,16 @@ export class CommandService {
         } catch (error: any) {
             console.error(`[EXECUTION FAILED] "${command}" in ${finalCwd}`);
 
+            const lastOutput = (error.stdout || "").split('\n').slice(-10).join('\n') +
+                "\n" +
+                (error.stderr || "").split('\n').slice(-10).join('\n');
+
             let dirList = "n/a";
-            try { dirList = fs.readdirSync(finalCwd).slice(0, 10).join(", "); } catch (e) { }
+            try { dirList = fs.readdirSync(finalCwd).slice(0, 50).join(", "); } catch (e) { }
 
             return {
                 stdout: error.stdout || "",
-                stderr: `${error.stderr || error.message}\n[DEBUG] finalCwd: ${finalCwd}\n[DEBUG] Files in CWD: ${dirList}`,
+                stderr: `${error.message}\n\n[OUTPUT TAIL]\n${lastOutput}\n\n[DEBUG] finalCwd: ${finalCwd}\n[DEBUG] Files in CWD (first 50): ${dirList}`,
                 exitCode: error.code || 1,
             };
         }
