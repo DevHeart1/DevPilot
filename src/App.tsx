@@ -74,21 +74,14 @@ export default function App() {
         path="/"
         element={
           <div className="min-h-screen bg-background-dark font-display text-slate-100 selection:bg-primary/30">
-            <Header
-              projectLabel={integrationState.project?.name || "Select Project"}
-              projectPath={projectPath}
-              branches={branchNames}
-              selectedBranch={selectedBranch}
-              onBranchChange={setSelectedBranch}
-              availableProjects={integrationState.availableProjects}
-              onProjectChange={handleProjectChange}
-              disabled={!integrationState.ready}
-            />
+            <Header />
             <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
               <DashboardHeroComposer
                 onSubmit={handleCreateTask}
                 isReady={integrationState.ready}
                 isSubmitting={isCreatingTask}
+                projectLabel={integrationState.project?.name || "Select Project"}
+                branchLabel={selectedBranch || "main"}
               />
 
               <section className="mt-16">
@@ -108,16 +101,7 @@ export default function App() {
         path="/task/:taskId"
         element={
           <div className="min-h-screen bg-background-dark font-display text-slate-100 selection:bg-primary/30">
-            <Header
-              projectLabel={integrationState.project?.name || "Select Project"}
-              projectPath={projectPath}
-              branches={branchNames}
-              selectedBranch={selectedBranch}
-              onBranchChange={setSelectedBranch}
-              availableProjects={integrationState.availableProjects}
-              onProjectChange={handleProjectChange}
-              disabled={!integrationState.ready}
-            />
+            <Header />
             <TaskDetailRoute projects={[projectPath]} branches={branchNames} />
           </div>
         }

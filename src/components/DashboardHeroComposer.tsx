@@ -78,6 +78,8 @@ interface DashboardHeroComposerProps {
   isReady?: boolean;
   placeholder?: string;
   helperText?: string;
+  projectLabel?: string;
+  branchLabel?: string;
 }
 
 export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
@@ -87,6 +89,8 @@ export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
   isReady = false,
   placeholder = "Describe the UI defect, repository task, or verification goal",
   helperText = "Routes through vision inspection, patch proposal, and verification before GitLab handoff.",
+  projectLabel = "Select Project",
+  branchLabel = "main",
 }) => {
   const [content, setContent] = useState("");
 
@@ -153,6 +157,19 @@ export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
 
               {/* Repository · Branch · Run Mode — second row beneath */}
               <div className="flex w-full flex-wrap items-stretch gap-2 justify-end sm:flex-nowrap">
+                <HeroControlChip
+                  icon={Folder}
+                  label="Repository"
+                  value={projectLabel}
+                  disabled={disabled}
+                />
+                <HeroControlChip
+                  icon={GitBranch}
+                  label="Branch"
+                  value={branchLabel}
+                  accent
+                  disabled={disabled}
+                />
 
 
                 <button

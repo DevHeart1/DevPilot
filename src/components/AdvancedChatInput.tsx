@@ -191,11 +191,10 @@ export const AdvancedChatInput: React.FC<AdvancedChatInputProps> = ({
               {activeSuggestions.map((suggestion, index) => (
                 <button
                   key={`${suggestionType}-${suggestion.name}`}
-                  className={`flex w-full flex-col border-l-2 px-3 py-2 text-left transition-colors ${
-                    index === suggestionIndex
+                  className={`flex w-full flex-col border-l-2 px-3 py-2 text-left transition-colors ${index === suggestionIndex
                       ? "border-primary bg-primary/10"
                       : "border-transparent hover:bg-[#252525]"
-                  }`}
+                    }`}
                   onClick={() =>
                     applySuggestion(
                       suggestionType === "command"
@@ -206,11 +205,10 @@ export const AdvancedChatInput: React.FC<AdvancedChatInputProps> = ({
                   type="button"
                 >
                   <span
-                    className={`text-sm font-medium ${
-                      index === suggestionIndex
+                    className={`text-sm font-medium ${index === suggestionIndex
                         ? "text-primary-light"
                         : "text-slate-300"
-                    }`}
+                      }`}
                   >
                     {suggestion.name}
                   </span>
@@ -244,81 +242,14 @@ export const AdvancedChatInput: React.FC<AdvancedChatInputProps> = ({
 
         <div className="mx-2 h-6 w-px bg-[#2A2A2A]" />
 
-        <div className="flex items-center gap-1.5">
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                if (disabled || projects.length === 0) {
-                  return;
-                }
-                setIsProjectDropdownOpen(!isProjectDropdownOpen);
-                setIsBranchDropdownOpen(false);
-              }}
-              className="flex items-center gap-1.5 rounded-md bg-[#202020] px-2.5 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-[#252525] disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={disabled || projects.length === 0}
-            >
-              <Folder className="h-3.5 w-3.5 text-slate-400" />
-              <span>{selectedProject || "No project"}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
-            </button>
-
-            {isProjectDropdownOpen && (
-              <div className="absolute bottom-full right-0 z-50 mb-1 w-52 rounded-md border border-[#2A2A2A] bg-[#1A1A1A] py-1 shadow-lg">
-                {projects.map((project) => (
-                  <button
-                    key={project}
-                    className="w-full px-3 py-1.5 text-left text-xs text-slate-300 transition-colors hover:bg-[#252525] hover:text-white"
-                    onClick={() => {
-                      setSelectedProject(project);
-                      setIsProjectDropdownOpen(false);
-                    }}
-                    type="button"
-                  >
-                    {project}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => {
-                if (disabled || branches.length === 0) {
-                  return;
-                }
-                setIsBranchDropdownOpen(!isBranchDropdownOpen);
-                setIsProjectDropdownOpen(false);
-              }}
-              className="flex items-center gap-1.5 rounded-md bg-[#202020] px-2.5 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-[#252525] disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={disabled || branches.length === 0}
-            >
-              <GitBranch className="h-3.5 w-3.5 text-slate-400" />
-              <span>{selectedBranch || "No branch"}</span>
-              <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
-            </button>
-
-            {isBranchDropdownOpen && (
-              <div className="absolute bottom-full right-0 z-50 mb-1 w-52 rounded-md border border-[#2A2A2A] bg-[#1A1A1A] py-1 shadow-lg">
-                {branches.map((branch) => (
-                  <button
-                    key={branch}
-                    className="w-full px-3 py-1.5 text-left text-xs text-slate-300 transition-colors hover:bg-[#252525] hover:text-white"
-                    onClick={() => {
-                      setSelectedBranch(branch);
-                      setIsBranchDropdownOpen(false);
-                    }}
-                    type="button"
-                  >
-                    {branch}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={submit}
+          disabled={disabled || !content.trim()}
+          className="flex items-center justify-center rounded-lg bg-primary/90 px-3 py-1.5 text-xs font-bold text-background-dark transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <span className="material-symbols-outlined text-[16px]">send</span>
+        </button>
       </div>
     </div>
   );

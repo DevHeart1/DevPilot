@@ -483,6 +483,31 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
                     </div>
 
                     <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:gap-3">
+                        {/* Project selector */}
+                        <div className="relative group/proj">
+                            <button
+                                type="button"
+                                className="flex items-center gap-1.5 rounded-lg border border-border-dark bg-surface-dark px-2.5 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-white/[0.06]"
+                            >
+                                <span className="material-symbols-outlined text-[14px] text-slate-500">folder</span>
+                                <span className="max-w-[120px] truncate">{projects[0] || "Project"}</span>
+                                <span className="material-symbols-outlined text-[12px] text-slate-500">expand_more</span>
+                            </button>
+                        </div>
+                        {/* Branch selector */}
+                        <div className="relative group/branch">
+                            <button
+                                type="button"
+                                className="flex items-center gap-1.5 rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/[0.14]"
+                            >
+                                <span className="material-symbols-outlined text-[14px] text-primary/70">fork_right</span>
+                                <span className="max-w-[100px] truncate">{branches[0] || "main"}</span>
+                                <span className="material-symbols-outlined text-[12px] text-primary/60">expand_more</span>
+                            </button>
+                        </div>
+
+                        <div className="h-6 w-px bg-border-dark hidden sm:block" />
+
                         <button
                             type="button"
                             onClick={() => {
