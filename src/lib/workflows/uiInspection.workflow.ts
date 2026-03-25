@@ -100,8 +100,29 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
     await runService.updateRunStepStatus(
       stepRecords[0],
       "running",
+      "Setting up sandbox workspace (cloning repository)...",
+    );
+
+    // 0. Setup Workspace (Clone repo)
+    try {
+      const { config: coreConfig } = await import("../config/env");
+      const gitlabUrl = task.gitlabProjectWebUrl || task.repo;
+      if (!gitlabUrl) {
+        throw new Error("GitLab project URL is missing from task.");
+      }
+      await sandboxAdapter.setupWorkspace(gitlabUrl, task.branch, coreConfig.gitlabToken);
+      console.log(`[WORKFLOW] Sandbox workspace ready for ${gitlabUrl} @ ${task.branch}`);
+    } catch (e: any) {
+      throw new Error(`Failed to setup sandbox workspace: ${e.message}`);
+    }
+
+
+    await runService.updateRunStepStatus(
+      stepRecords[0],
+      "running",
       "Running 'npm install' and 'npm run build'...",
     );
+
 
     // 1. Build the app
     await sandboxAdapter.executeCommand("npm install");

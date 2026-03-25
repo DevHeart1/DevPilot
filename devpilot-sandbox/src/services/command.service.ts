@@ -19,10 +19,12 @@ export class CommandService {
      * Resolves the working directory intelligently.
      */
     private async getCwd(): Promise<string> {
-        const repoRoot = path.resolve(__dirname, "../../..");
-        const { appPath } = await workspaceService.setupWorkspace(repoRoot);
+        // Workspace is created/cloned in the 'workspace' subfolder of the sandbox root
+        const workspaceBase = path.resolve(process.cwd(), "workspace");
+        const { appPath } = await workspaceService.setupWorkspace(workspaceBase);
         return appPath;
     }
+
 
     /**
      * Executes a command in the resolved workspace.

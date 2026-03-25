@@ -12,7 +12,7 @@ export class WorkspaceService {
         const absoluteRepoPath = path.resolve(repoPath);
         this.currentRepoPath = absoluteRepoPath;
 
-        console.log(`[WORKSPACE] Setting up workspace at: ${absoluteRepoPath}`);
+        console.log(`[WORKSPACE] Analyzing repository at: ${absoluteRepoPath}`);
 
         // 1. Check if it's the root
         if (this.hasPackageJson(absoluteRepoPath)) {
@@ -26,25 +26,33 @@ export class WorkspaceService {
             for (const candidate of candidates) {
                 const fullPath = path.join(absoluteRepoPath, candidate);
                 if (this.hasPackageJson(fullPath)) {
-                    console.log(`[WORKSPACE] Detected app in candidate path: ${candidate}`);
+                    console.log(`[WORKSPACE] Detected app directory: ${candidate}`);
                     this.currentAppPath = fullPath;
                     found = true;
                     break;
                 }
             }
 
-            // 3. Recursive search (last resort)
+            // 3. One-level deep search (if not found in candidates)
             if (!found) {
-                const deepMatch = this.findPackageJsonRecursively(absoluteRepoPath, 2);
-                if (deepMatch) {
-                    console.log(`[WORKSPACE] Found package.json via deep search: ${deepMatch}`);
-                    this.currentAppPath = deepMatch;
-                    found = true;
-                }
+                try {
+                    const items = fs.readdirSync(absoluteRepoPath);
+                    for (const item of items) {
+                        const fullPath = path.join(absoluteRepoPath, item);
+                        if (fs.statSync(fullPath).isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
+                            if (this.hasPackageJson(fullPath)) {
+                                console.log(`[WORKSPACE] Found app in subdirectory: ${item}`);
+                                this.currentAppPath = fullPath;
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                } catch (e) { }
             }
 
             if (!found) {
-                console.warn(`[WORKSPACE] WARNING: Could not find package.json anywhere in ${absoluteRepoPath}. Falling back to repo root.`);
+                console.warn(`[WORKSPACE] WARNING: No package.json found. Defaulting to repo root: ${absoluteRepoPath}`);
                 this.currentAppPath = absoluteRepoPath;
             }
         }
@@ -57,50 +65,14 @@ export class WorkspaceService {
 
     private hasPackageJson(dir: string): boolean {
         const pkgPath = path.join(dir, "package.json");
-        const exists = fs.existsSync(pkgPath);
-        if (exists) {
-            try {
-                const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-                // Avoid detecting the sandbox or other tools as the app
-                return pkg.name !== 'devpilot-sandbox';
-            } catch (e) {
-                return true; // Still exists even if unparseable
-            }
-        }
-        return false;
-    }
-
-    private findPackageJsonRecursively(dir: string, maxDepth: number): string | null {
-        if (maxDepth < 0) return null;
-        if (!fs.existsSync(dir)) return null;
-
-        try {
-            const items = fs.readdirSync(dir);
-            for (const item of items) {
-                const fullPath = path.join(dir, item);
-                if (fs.statSync(fullPath).isDirectory() && !item.startsWith('.') && item !== 'node_modules') {
-                    if (this.hasPackageJson(fullPath)) return fullPath;
-                    const matched = this.findPackageJsonRecursively(fullPath, maxDepth - 1);
-                    if (matched) return matched;
-                }
-            }
-        } catch (e) { }
-        return null;
-    }
-
-    getRepoPath(): string | null {
-        return this.currentRepoPath;
-    }
-
-    getAppPath(): string | null {
-        return this.currentAppPath;
+        return fs.existsSync(pkgPath);
     }
 
     getWorkspaceInfo() {
         return {
             repoPath: this.currentRepoPath,
             appPath: this.currentAppPath,
-            packageJsonExists: this.currentAppPath ? fs.existsSync(path.join(this.currentAppPath, "package.json")) : false,
+            packageJsonExists: this.currentAppPath ? this.hasPackageJson(this.currentAppPath) : false,
         };
     }
 }

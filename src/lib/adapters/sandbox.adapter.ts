@@ -161,6 +161,24 @@ export const sandboxAdapter = {
       throw new Error(`Failed to stop background command: ${error.error || response.statusText}`);
     }
   },
+
+  async setupWorkspace(gitlabUrl: string, branch: string, token?: string): Promise<{ repoPath: string; appPath: string }> {
+    await sandboxAdapter.assertHealthy();
+
+    const response = await fetch(`${sandboxAdapter.getSandboxBaseUrl()}/api/workspace/setup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gitlabUrl, branch, token }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Workspace setup failed: ${error.error || response.statusText}`);
+    }
+
+    return (await response.json()) as { repoPath: string; appPath: string };
+  },
 };
+
 
 

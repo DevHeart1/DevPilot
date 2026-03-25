@@ -5,6 +5,8 @@ import { createServer } from "http";
 import * as dotenv from "dotenv";
 import { sessionService } from "./services/session.service";
 import { commandService } from "./services/command.service";
+import { workspaceService } from "./services/workspace.service";
+import { gitService } from "./services/git.service";
 
 
 dotenv.config();
@@ -134,7 +136,29 @@ apiRouter.delete("/sessions/:id", async (req: Request, res: Response) => {
   }
 });
 
+
+// Sandbox Lifecycle API
+
+// ... existing code ...
+
+apiRouter.post("/workspace/setup", async (req: Request, res: Response) => {
+  const { gitlabUrl, branch, token } = req.body;
+  if (!gitlabUrl || !branch) {
+    return res.status(400).json({ error: "gitlabUrl and branch are required" });
+  }
+
+  try {
+    console.log(`[INIT] Setting up workspace for ${gitlabUrl} @ ${branch}`);
+    const repoPath = await gitService.cloneRepo(gitlabUrl, branch, token);
+    const result = await workspaceService.setupWorkspace(repoPath);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || "Workspace setup failed" });
+  }
+});
+
 apiRouter.post("/execute", async (req: Request, res: Response) => {
+
   const { command, cwd } = req.body;
   if (!command) {
     return res.status(400).json({ error: "Command is required" });
