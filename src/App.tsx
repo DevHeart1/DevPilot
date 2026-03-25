@@ -82,6 +82,10 @@ export default function App() {
                 isSubmitting={isCreatingTask}
                 projectLabel={integrationState.project?.name || "Select Project"}
                 branchLabel={selectedBranch || "main"}
+                availableProjects={integrationState.availableProjects}
+                branches={branchNames}
+                onProjectChange={handleProjectChange}
+                onBranchChange={setSelectedBranch}
               />
 
               <section className="mt-16">

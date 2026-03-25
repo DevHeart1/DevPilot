@@ -80,6 +80,10 @@ interface DashboardHeroComposerProps {
   helperText?: string;
   projectLabel?: string;
   branchLabel?: string;
+  availableProjects?: GitLabProjectSummary[];
+  branches?: string[];
+  onProjectChange?: (projectId: string | number) => void;
+  onBranchChange?: (branch: string) => void;
 }
 
 export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
@@ -91,8 +95,26 @@ export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
   helperText = "Routes through vision inspection, patch proposal, and verification before GitLab handoff.",
   projectLabel = "Select Project",
   branchLabel = "main",
+  availableProjects = [],
+  branches = [],
+  onProjectChange,
+  onBranchChange,
 }) => {
   const [content, setContent] = useState("");
+  const [isProjectOpen, setIsProjectOpen] = useState(false);
+  const [isBranchOpen, setIsBranchOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsProjectOpen(false);
+        setIsBranchOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -156,21 +178,81 @@ export const DashboardHeroComposer: React.FC<DashboardHeroComposerProps> = ({
               </div>
 
               {/* Repository · Branch · Run Mode — second row beneath */}
-              <div className="flex w-full flex-wrap items-stretch gap-2 justify-end sm:flex-nowrap">
-                <HeroControlChip
-                  icon={Folder}
-                  label="Repository"
-                  value={projectLabel}
-                  disabled={disabled}
-                />
-                <HeroControlChip
-                  icon={GitBranch}
-                  label="Branch"
-                  value={branchLabel}
-                  accent
-                  disabled={disabled}
-                />
+              <div className="flex w-full flex-wrap items-stretch gap-2 justify-end sm:flex-nowrap" ref={dropdownRef}>
+                {/* Repository dropdown */}
+                <div className="relative flex-1 sm:flex-none">
+                  <HeroControlChip
+                    icon={Folder}
+                    label="Repository"
+                    value={projectLabel}
+                    disabled={disabled || availableProjects.length === 0}
+                    onClick={() => {
+                      setIsProjectOpen(!isProjectOpen);
+                      setIsBranchOpen(false);
+                    }}
+                  />
+                  {isProjectOpen && availableProjects.length > 0 && (
+                    <div className="absolute top-full left-0 z-50 mt-2 w-64 overflow-hidden rounded-xl border border-white/[0.08] bg-[#1a1a1a] py-1 shadow-2xl backdrop-blur-xl">
+                      <div className="border-b border-white/5 bg-[#151515] px-3 py-1.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Select Repository</span>
+                      </div>
+                      <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                        {availableProjects.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-300 transition-colors hover:bg-white/[0.06] hover:text-white"
+                            onClick={() => {
+                              onProjectChange?.(p.id);
+                              setIsProjectOpen(false);
+                            }}
+                          >
+                            <Folder className="h-3.5 w-3.5 text-slate-500 shrink-0" />
+                            <span className="truncate">{p.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
+                {/* Branch dropdown */}
+                <div className="relative flex-1 sm:flex-none">
+                  <HeroControlChip
+                    icon={GitBranch}
+                    label="Branch"
+                    value={branchLabel}
+                    accent
+                    disabled={disabled || branches.length === 0}
+                    onClick={() => {
+                      setIsBranchOpen(!isBranchOpen);
+                      setIsProjectOpen(false);
+                    }}
+                  />
+                  {isBranchOpen && branches.length > 0 && (
+                    <div className="absolute top-full left-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-primary/[0.12] bg-[#1a1a1a] py-1 shadow-2xl backdrop-blur-xl">
+                      <div className="border-b border-primary/10 bg-primary/5 px-3 py-1.5">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/70">Select Branch</span>
+                      </div>
+                      <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                        {branches.map((b) => (
+                          <button
+                            key={b}
+                            type="button"
+                            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-primary/10 hover:text-white ${b === branchLabel ? "bg-primary/10 text-primary font-semibold" : "text-slate-300"}`}
+                            onClick={() => {
+                              onBranchChange?.(b);
+                              setIsBranchOpen(false);
+                            }}
+                          >
+                            <GitBranch className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">{b}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <button
                   type="submit"
