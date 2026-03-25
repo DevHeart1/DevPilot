@@ -24,6 +24,10 @@ export const taskService = {
     return await db.taskArtifacts.where('[taskId+type]').equals([taskId, type]).first();
   },
 
+  getArtifactById: async (id: string): Promise<TaskArtifact | undefined> => {
+    return await db.taskArtifacts.get(id);
+  },
+
   getActiveAgentRun: async (taskId: string): Promise<AgentRun | undefined> => {
     return await db.agentRuns.where('taskId').equals(taskId).first();
   },
@@ -58,12 +62,15 @@ export const taskService = {
     });
   },
 
-  updateTaskArtifact: async (taskId: string, type: TaskArtifact['type'], content: string): Promise<string | number> => {
+  updateTaskArtifact: async (taskId: string, type: TaskArtifact['type'], content: string): Promise<string> => {
     const existing = await db.taskArtifacts.where('[taskId+type]').equals([taskId, type]).first();
     if (existing) {
-      return await db.taskArtifacts.update(existing.id, { content, timestamp: Date.now() });
+      await db.taskArtifacts.update(existing.id, { content, timestamp: Date.now() });
+      return existing.id;
     } else {
-      return await db.taskArtifacts.add({ id: crypto.randomUUID(), taskId, type, content, timestamp: Date.now() }) as string;
+      const newId = crypto.randomUUID();
+      await db.taskArtifacts.add({ id: newId, taskId, type, content, timestamp: Date.now() });
+      return newId;
     }
   },
 

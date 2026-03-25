@@ -176,6 +176,7 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
       sender: "devpilot",
       content: `Vision analysis complete: detected ${analysis.issueType}. Recommended fix: ${analysis.recommendedFix}`,
       kind: analysis.severity === "high" ? "warning" : "info",
+      artifactIds: [screenshotArtifactId, terminalArtifactId],
       timestamp: Date.now(),
     });
     await completeStep(3, "Vision analysis generated.");

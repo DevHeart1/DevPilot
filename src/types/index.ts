@@ -35,6 +35,7 @@ export interface AgentMessage {
   sender: "devpilot" | "ui_agent" | "code_agent" | "system";
   content: string;
   kind: "info" | "warning" | "success" | "thinking";
+  artifactIds?: string[];
   timestamp: number;
 }
 

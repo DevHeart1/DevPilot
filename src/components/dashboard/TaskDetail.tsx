@@ -21,6 +21,82 @@ import {
     Task,
 } from "../../types";
 
+const MessageAttachment = ({ artifactId }: { artifactId: string }) => {
+    const artifact = useLiveQuery(() => taskService.getArtifactById(artifactId), [artifactId]);
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
+
+    if (!artifact) return null;
+
+    if (artifact.type === "screenshot" || artifact.type === "vision_analysis") {
+        const isImage = artifact.type === "screenshot" || artifact.content.startsWith("data:image");
+        if (isImage) {
+            return (
+                <>
+                    <button
+                        type="button"
+                        className="mt-2 block w-full max-w-sm overflow-hidden rounded-lg border border-border-dark bg-black/40 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-primary"
+                        onClick={() => setIsViewerOpen(true)}
+                    >
+                        <img src={artifact.content} alt="Screenshot Attachment" className="w-full h-auto object-cover" />
+                        <div className="bg-[#111] px-3 py-1.5 text-[10px] text-slate-400 font-mono flex items-center gap-2 border-t border-border-dark">
+                            <span className="material-symbols-outlined text-[12px]">image</span>
+                            Visual Capture
+                        </div>
+                    </button>
+                    {isViewerOpen && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8" onClick={() => setIsViewerOpen(false)}>
+                            <img src={artifact.content} alt="Fullscreen Screenshot" className="max-h-full max-w-full object-contain rounded-lg border border-white/10 shadow-2xl" />
+                            <button className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                    )}
+                </>
+            );
+        }
+    }
+
+    if (artifact.type === "terminal") {
+        return (
+            <>
+                <button
+                    type="button"
+                    className="mt-2 flex w-full max-w-[200px] items-center gap-3 rounded-lg border border-border-dark bg-[#111] px-3 py-2 text-left hover:bg-white/[0.04] transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                    onClick={() => setIsViewerOpen(true)}
+                >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-slate-800 text-slate-400">
+                        <span className="material-symbols-outlined">terminal</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <div className="text-[11px] font-bold text-slate-300 truncate">Console Output</div>
+                        <div className="text-[10px] text-slate-500 font-mono truncate">{artifact.content.length} characters</div>
+                    </div>
+                </button>
+                {isViewerOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8" onClick={() => setIsViewerOpen(false)}>
+                        <div className="w-full max-w-5xl flex flex-col h-[80vh] overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] shadow-2xl" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#111] flex-none">
+                                <h3 className="font-mono text-sm font-semibold text-slate-300 flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-[16px] text-slate-500">terminal</span>
+                                    DOM Snapshot / Console Output
+                                </h3>
+                                <button className="text-slate-500 hover:text-white transition-colors" onClick={() => setIsViewerOpen(false)}>
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                            <div className="p-4 flex-1 overflow-y-auto custom-scrollbar bg-black">
+                                <pre className="text-xs text-slate-300 font-mono whitespace-pre-wrap break-all leading-relaxed">{artifact.content}</pre>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </>
+        );
+    }
+
+    return null;
+};
+
 const statusBadgeLabel = (status?: string) =>
     status ? status.replace(/_/g, " ") : "unknown";
 
@@ -491,8 +567,13 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({
                                                     {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>
-                                            <div className={`rounded-lg border border-border-dark bg-[#151515] p-3 text-[13px] leading-relaxed ${message.sender === "system" ? "text-slate-400 font-mono text-[11px]" : "text-slate-300"}`}>
+                                            <div className={`rounded-lg border border-border-dark bg-[#151515] p-3 text-[13px] leading-relaxed break-words ${message.sender === "system" ? "text-slate-400 font-mono text-[11px]" : "text-slate-300"}`}>
                                                 {message.content}
+                                                {message.artifactIds && message.artifactIds.length > 0 && (
+                                                    <div className="mt-3 flex flex-wrap gap-2">
+                                                        {message.artifactIds.map(id => <MessageAttachment key={id} artifactId={id} />)}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     );
