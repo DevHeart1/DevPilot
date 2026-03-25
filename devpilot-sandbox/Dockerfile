@@ -10,6 +10,9 @@ WORKDIR /app
 # Copy application files
 COPY . .
 
+# Ensure alternate package managers are available in the runtime
+RUN npm install -g pnpm yarn
+
 # Install all dependencies (including devDependencies like tsc)
 RUN npm install
 # Build the application

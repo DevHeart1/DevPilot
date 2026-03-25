@@ -11,6 +11,41 @@ export interface ExecutionResult {
   exitCode: number;
 }
 
+export interface SandboxVerificationCheck {
+  name: string;
+  status: "pass" | "warn" | "fail";
+  detail: string;
+}
+
+export interface SandboxWorkspaceCandidate {
+  absolutePath: string;
+  relativePath: string;
+  score: number;
+  reasons: string[];
+  framework: "vite" | "nextjs" | "react-spa" | "node";
+  packageManager: "npm" | "pnpm" | "yarn";
+  detectedLockfile: "pnpm-lock.yaml" | "package-lock.json" | "yarn.lock" | null;
+}
+
+export interface SandboxSetupResponse {
+  repoRoot: string;
+  appRoot: string;
+  installRoot: string;
+  framework: "vite" | "nextjs" | "react-spa" | "node";
+  packageManager: "npm" | "pnpm" | "yarn";
+  detectedLockfile: "pnpm-lock.yaml" | "package-lock.json" | "yarn.lock" | null;
+  detectedLockfilePath: string | null;
+  installCommandUsed: string;
+  buildCommandUsed: string | null;
+  devCommandUsed: string | null;
+  previewCommandUsed: string | null;
+  candidateRootsConsidered: SandboxWorkspaceCandidate[];
+  reasoning: string[];
+  verificationChecks: SandboxVerificationCheck[];
+  warnings: string[];
+  success: boolean;
+}
+
 
 export interface SandboxSessionRequest {
   id: string;
@@ -162,7 +197,7 @@ export const sandboxAdapter = {
     }
   },
 
-  async setupWorkspace(gitlabUrl: string, branch: string, token?: string): Promise<{ repoPath: string; appPath: string }> {
+  async setupWorkspace(gitlabUrl: string, branch: string, token?: string): Promise<SandboxSetupResponse> {
     await sandboxAdapter.assertHealthy();
 
     const response = await fetch(`${sandboxAdapter.getSandboxBaseUrl()}/api/workspace/setup`, {
@@ -176,9 +211,8 @@ export const sandboxAdapter = {
       throw new Error(`Workspace setup failed: ${error.error || response.statusText}`);
     }
 
-    return (await response.json()) as { repoPath: string; appPath: string };
+    return (await response.json()) as SandboxSetupResponse;
   },
 };
-
 
 

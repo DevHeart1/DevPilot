@@ -97,6 +97,10 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
   };
 
   try {
+    let bootstrapMetadata:
+      | Awaited<ReturnType<typeof sandboxAdapter.setupWorkspace>>
+      | null = null;
+
     await runService.updateRunStepStatus(
       stepRecords[0],
       "running",
@@ -110,8 +114,11 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
       if (!gitlabUrl) {
         throw new Error("GitLab project URL is missing from task.");
       }
-      await sandboxAdapter.setupWorkspace(gitlabUrl, task.branch, coreConfig.gitlabToken);
-      console.log(`[WORKFLOW] Sandbox workspace ready for ${gitlabUrl} @ ${task.branch}`);
+      bootstrapMetadata = await sandboxAdapter.setupWorkspace(gitlabUrl, task.branch, coreConfig.gitlabToken);
+      console.log(
+        `[WORKFLOW] Sandbox workspace ready for ${gitlabUrl} @ ${task.branch}. ` +
+        `appRoot=${bootstrapMetadata.appRoot}, framework=${bootstrapMetadata.framework}, packageManager=${bootstrapMetadata.packageManager}`,
+      );
     } catch (e: any) {
       throw new Error(`Failed to setup sandbox workspace: ${e.message}`);
     }
@@ -120,7 +127,7 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
     await runService.updateRunStepStatus(
       stepRecords[0],
       "running",
-      "Running 'npm install' and 'npm run build'...",
+      `Running '${bootstrapMetadata?.installCommandUsed ?? "install"}' and '${bootstrapMetadata?.buildCommandUsed ?? "build"}'...`,
     );
 
 
@@ -135,7 +142,11 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
     await completeStep(0, "Application built successfully.");
 
     // 2. Start the server (using 'npm run dev' or 'npm run preview')
-    await sandboxAdapter.startBackgroundCommand(serverId, "npm run dev");
+    const runtimeCommand =
+      bootstrapMetadata?.devCommandUsed ||
+      bootstrapMetadata?.previewCommandUsed ||
+      "npm run dev";
+    await sandboxAdapter.startBackgroundCommand(serverId, runtimeCommand);
 
 
     // 3. Poll for readiness
@@ -349,4 +360,3 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
     await sandboxAdapter.closeSession(taskId);
   }
 };
-

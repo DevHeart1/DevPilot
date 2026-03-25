@@ -5,8 +5,8 @@ import { createServer } from "http";
 import * as dotenv from "dotenv";
 import { sessionService } from "./services/session.service";
 import { commandService } from "./services/command.service";
-import { workspaceService } from "./services/workspace.service";
 import { gitService } from "./services/git.service";
+import { bootstrapService } from "./services/bootstrap.service";
 
 
 dotenv.config();
@@ -150,7 +150,7 @@ apiRouter.post("/workspace/setup", async (req: Request, res: Response) => {
   try {
     console.log(`[INIT] Setting up workspace for ${gitlabUrl} @ ${branch}`);
     const repoPath = await gitService.cloneRepo(gitlabUrl, branch, token);
-    const result = await workspaceService.setupWorkspace(repoPath);
+    const result = await bootstrapService.prepareWorkspace(repoPath);
     res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message || "Workspace setup failed" });

@@ -18,6 +18,7 @@ export class GitService {
         }
 
         // Cleanup existing content in workspace
+        console.log(`[GIT] Cleaning workspace at ${workspaceDir}`);
         const items = fs.readdirSync(workspaceDir);
         for (const item of items) {
             fs.rmSync(path.join(workspaceDir, item), { recursive: true, force: true });
@@ -32,6 +33,7 @@ export class GitService {
         }
 
         const command = `git clone --branch ${branch} --single-branch ${authenticatedUrl} .`;
+        console.log(`[GIT] Clone command prepared for destination ${workspaceDir}`);
 
         try {
             await execAsync(command, { cwd: workspaceDir });
