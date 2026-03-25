@@ -38,26 +38,37 @@ export class CommandService {
         console.log(`Resolved App Path:  ${info.appPath}`);
         console.log(`Package.json found: ${info.packageJsonExists}`);
         console.log(`Command:           "${command}"`);
-        console.log(`Exact CWD used:     ${finalCwd}`);
         // Intelligence for package manager
         const { packageManager } = workspaceService.getWorkspaceInfo();
         let finalCommand = command;
-        if (command.startsWith("npm") && packageManager !== "npm") {
-            finalCommand = command.replace("npm", packageManager);
+
+        // Smart swapping for install/ci
+        if (command === "npm install" || command === "npm ci") {
+            if (packageManager === "npm") {
+                const hasLock = fs.existsSync(path.join(finalCwd, "package-lock.json"));
+                finalCommand = hasLock ? "npm ci" : "npm install";
+            } else {
+                finalCommand = `${packageManager} install`;
+            }
+            console.log(`[INTELLIGENCE] Swapped to: ${finalCommand}`);
+        } else if (command.startsWith("npm ") && packageManager !== "npm") {
+            finalCommand = command.replace("npm ", `${packageManager} `);
             console.log(`[INTELLIGENCE] Swapping 'npm' for '${packageManager}' lockfile found.`);
         }
+
+        // Pre-check for manifest
+        if (!fs.existsSync(path.join(finalCwd, "package.json"))) {
+            const files = fs.readdirSync(finalCwd).slice(0, 50).join(", ");
+            throw new Error(`Execution aborted: package.json missing in ${finalCwd}. Files present: ${files}`);
+        }
+
+        console.log(`[EXEC] Running: ${finalCommand}`);
+        console.log(`Exact CWD used:     ${finalCwd}`);
         console.log(`---------------------------\n`);
 
         try {
             if (!fs.existsSync(finalCwd)) {
                 throw new Error(`Directory does not exist: ${finalCwd}`);
-            }
-
-            // Pre-check for manifest
-            if (!fs.existsSync(path.join(finalCwd, "package.json"))) {
-                console.warn(`[WARNING] No package.json found in ${finalCwd}. Manifest list follows:`);
-                const files = fs.readdirSync(finalCwd).join(", ");
-                throw new Error(`Execution aborted: package.json missing in CWD. Files present: ${files}`);
             }
 
             const { stdout, stderr } = await execAsync(finalCommand, {
