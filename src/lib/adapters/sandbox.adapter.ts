@@ -5,6 +5,13 @@ export interface SandboxViewport {
   height: number;
 }
 
+export interface ExecutionResult {
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+}
+
+
 export interface SandboxSessionRequest {
   id: string;
   targetUrl: string;
@@ -106,4 +113,54 @@ export const sandboxAdapter = {
       method: "DELETE",
     });
   },
+
+  async executeCommand(command: string, cwd?: string): Promise<ExecutionResult> {
+    await sandboxAdapter.assertHealthy();
+
+    const response = await fetch(`${sandboxAdapter.getSandboxBaseUrl()}/api/execute`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command, cwd }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Command execution failed: ${error.error || response.statusText}`);
+    }
+
+    return (await response.json()) as ExecutionResult;
+  },
+
+  async startBackgroundCommand(id: string, command: string, cwd?: string): Promise<void> {
+    await sandboxAdapter.assertHealthy();
+
+    const response = await fetch(`${sandboxAdapter.getSandboxBaseUrl()}/api/execute/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, command, cwd }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Failed to start background command: ${error.error || response.statusText}`);
+    }
+  },
+
+  async stopBackgroundCommand(id: string): Promise<void> {
+    const isHealthy = await sandboxAdapter.checkHealth();
+    if (!isHealthy) return;
+
+    const response = await fetch(`${sandboxAdapter.getSandboxBaseUrl()}/api/execute/stop`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Failed to stop background command: ${error.error || response.statusText}`);
+    }
+  },
 };
+
+

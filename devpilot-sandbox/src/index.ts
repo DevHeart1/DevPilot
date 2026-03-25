@@ -4,6 +4,8 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import { createServer } from "http";
 import * as dotenv from "dotenv";
 import { sessionService } from "./services/session.service";
+import { commandService } from "./services/command.service";
+
 
 dotenv.config();
 
@@ -131,6 +133,50 @@ apiRouter.delete("/sessions/:id", async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message || "Failed to close session" });
   }
 });
+
+apiRouter.post("/execute", async (req: Request, res: Response) => {
+  const { command, cwd } = req.body;
+  if (!command) {
+    return res.status(400).json({ error: "Command is required" });
+  }
+
+  try {
+    const result = await commandService.execute(command, cwd);
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || "Execution failed" });
+  }
+});
+
+apiRouter.post("/execute/start", async (req: Request, res: Response) => {
+  const { id, command, cwd } = req.body;
+  if (!id || !command) {
+    return res.status(400).json({ error: "ID and Command are required" });
+  }
+
+  try {
+    await commandService.startBackground(id, command, cwd);
+    res.json({ status: "started", id });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || "Start failed" });
+  }
+});
+
+apiRouter.post("/execute/stop", async (req: Request, res: Response) => {
+  const { id } = req.body;
+  if (!id) {
+    return res.status(400).json({ error: "ID is required" });
+  }
+
+  try {
+    await commandService.stopBackground(id);
+    res.json({ status: "stopped", id });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || "Stop failed" });
+  }
+});
+
+
 
 app.use("/api", apiRouter);
 

@@ -33,10 +33,16 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
 
   const workflowSteps = [
     {
+      key: "build_app",
+      label: "Build Application",
+      detail: "Installing dependencies and building the project...",
+    },
+    {
       key: "browser_session",
       label: "Launch Browser",
       detail: "Initializing the sandbox browser...",
     },
+
     {
       key: "capture_ui",
       label: "Capture UI",
@@ -89,17 +95,38 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
     await runService.updateRunStepStatus(
       stepRecords[0],
       "running",
-      "Launching sandbox session...",
+      "Running 'npm install' and 'npm run build'...",
     );
+
+    // 1. Build the app
+    await sandboxAdapter.executeCommand("npm install");
+    const buildResult = await sandboxAdapter.executeCommand("npm run build");
+
+    if (buildResult.exitCode !== 0) {
+      throw new Error(`Build failed: ${buildResult.stderr}`);
+    }
+
+    await completeStep(0, "Application built successfully.");
+
+    await runService.updateRunStepStatus(
+      stepRecords[1],
+      "running",
+      "Launching sandbox session with local server...",
+    );
+
+    // TODO: Determine if we need to start a server or use existing
+    // For now we assume the environment handles the serving or we start it here
+    // If it's a dev server, we might need a non-blocking start.
+
     const sandboxSession = await sandboxAdapter.createSession({
       id: taskId,
       targetUrl,
       viewport,
     });
-    await completeStep(0, "Sandbox session established.");
+    await completeStep(1, "Sandbox session established.");
 
     await runService.updateRunStepStatus(
-      stepRecords[1],
+      stepRecords[2],
       "running",
       "Capturing screenshot and console logs...",
     );
@@ -125,10 +152,10 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
       metadata: JSON.stringify({ terminalArtifactId, screenshotArtifactId }),
       timestamp: Date.now(),
     });
-    await completeStep(1, `Captured ${liveSession.currentUrl}.`);
+    await completeStep(2, `Captured ${liveSession.currentUrl}.`);
 
     await runService.updateRunStepStatus(
-      stepRecords[2],
+      stepRecords[3],
       "running",
       "Searching historical memory...",
     );
@@ -143,7 +170,7 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
         "Matched against a previously verified task.",
       );
     }
-    await completeStep(2, "Historical memory loaded.");
+    await completeStep(3, "Historical memory loaded.");
 
     await gitlabDuoAdapter.invokeAgent(
       taskId,
@@ -151,7 +178,7 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
       "ui_inspector",
     );
     await runService.updateRunStepStatus(
-      stepRecords[3],
+      stepRecords[4],
       "running",
       "Requesting Gemini vision analysis...",
     );
@@ -179,10 +206,10 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
       artifactIds: [screenshotArtifactId, terminalArtifactId],
       timestamp: Date.now(),
     });
-    await completeStep(3, "Vision analysis generated.");
+    await completeStep(4, "Vision analysis generated.");
 
     await runService.updateRunStepStatus(
-      stepRecords[4],
+      stepRecords[5],
       "running",
       "Finalizing inspection artifacts...",
     );
@@ -190,7 +217,8 @@ export const runUiInspectionWorkflow = async (taskId: string) => {
       inspectionStatus: "completed",
       lastInspectionAt: Date.now(),
     });
-    await completeStep(4, "Inspection finished.");
+    await completeStep(5, "Inspection finished.");
+
     await taskService.appendAgentMessage({
       taskId,
       sender: "system",
